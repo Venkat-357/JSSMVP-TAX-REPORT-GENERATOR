@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSS TAX REPORT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <table style="border: 5px solid black;" >
+        <tr>
+            <th>DIVISION ID</th>
+            <th>DIVISION</th>
+            <th>DISTRICT</th>
+            <th>TALUK</th>
+            <th>CITY/VILLAGE</th>
+            <th>PID NO</th>
+            <th>NAME OF THE INSTITUTION</th>
+            <th>NAME OF THE KHATHADHAR</th>
+            <th>KHATHA OR PROPERTY NO</th>
+            <th>PID NO</th>
+            <th>DIMENSION OF VACANT AREA (SQFT)</th>
+            <th>DIMENSION OF BUILDING AREA (SQFT)</th>
+            <th>TOTAL DIMENSION (SQFT)</th>
+            <th>TO WHICH DEPARTMENT PAID</th>
+            <th>YEAR OF PAYMENT</th>
+            <th>RECEIPT NO</th>
+            <th>PROPERTY TAX</th>
+            <th>REBATE</th>
+            <th>SERVICE TAX</th>
+            <th>CESSES</th>
+            <th>INTEREST</th>
+            <th>PENALTY</th>
+            <th>TOTAL AMOUNT</th>
+            <th>REMARKS</th>
+        </tr>
+            <% information.forEach((entry)=>{ %>
+                <tr>
+                    <td><%=entry.division_id%></td>
+                    <td><%=entry.division%></td>
+                    <td><%=entry.district%></td>
+                    <td><%=entry.taluk%></td>
+                    <td><%=entry.village_or_city%></td>
+                    <td><%=entry.pid_no%></td>
+                    <td><%=entry.name_of_institution%></td>
+                    <td><%=entry.name_of_khathadhar%></td>
+                    <td><%=entry.khatha_or_property_no%></td>
+                    <td><%=entry.pid_no%></td>
+                    <td><%=entry.dimension_of_vacant_area_in_sqft%></td>
+                    <td><%=entry.dimension_of_building_area_in_sqft%></td>
+                    <td><%=entry.total_dimension_in_sqft%></td>
+                    <td><%=entry.to_which_department_paid%></td>
+                    <td><%=entry.year_of_payment%></td>
+                    <td><%=entry.receipt_no%></td>
+                    <td><%=entry.property_tax%></td>
+                    <td><%=entry.rebate%></td>
+                    <td><%=entry.service_tax%></td>
+                    <td><%=entry.cesses%></td>
+                    <td><%=entry.interest%></td>
+                    <td><%=entry.penalty%></td>
+                    <td><%=entry.total_amount%></td>
+                    <td><%=entry.remarks%></td>
+                </tr>
+           <% }) %>
+    </table>
+
+    <form method="post" action="/new">
+        <button type="submit">Add New</button>
+    </form>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>    
+</body>
+</html>
