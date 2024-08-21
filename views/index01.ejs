@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,35 +6,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSS TAX REPORT</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content:space-between;
+            align-items: center;
+            background-color: rgb(241, 123, 38);
+            color: rgb(9, 9, 53);
+            padding: 10px 20px;
+            width: 100%;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        table, th, td {
+            border: 2px solid black;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+
+        th {
+            background-color: rgb(241, 123, 38);
+            color: rgb(9, 9, 53);
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f2f2f2;
+        }
+
+        .submit-button {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .submit-button button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submit-button button:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .cpy {
+            text-align: center;
+            padding-top: 1%;
+        }
+
+        .header .right-logo {
+            order: 2;
+        }
+    </style>
 </head>
 <body>
-    <table style="border: 5px solid black;" >
-        <tr>
-            <th>DIVISION ID</th>
-            <th>DIVISION</th>
-            <th>DISTRICT</th>
-            <th>TALUK</th>
-            <th>CITY/VILLAGE</th>
-            <th>PID NO</th>
-            <th>NAME OF THE INSTITUTION</th>
-            <th>NAME OF THE KHATHADHAR</th>
-            <th>KHATHA OR PROPERTY NO</th>
-            <th>PID NO</th>
-            <th>DIMENSION OF VACANT AREA (SQFT)</th>
-            <th>DIMENSION OF BUILDING AREA (SQFT)</th>
-            <th>TOTAL DIMENSION (SQFT)</th>
-            <th>TO WHICH DEPARTMENT PAID</th>
-            <th>YEAR OF PAYMENT</th>
-            <th>RECEIPT NO</th>
-            <th>PROPERTY TAX</th>
-            <th>REBATE</th>
-            <th>SERVICE TAX</th>
-            <th>CESSES</th>
-            <th>INTEREST</th>
-            <th>PENALTY</th>
-            <th>TOTAL AMOUNT</th>
-            <th>REMARKS</th>
-        </tr>
+    <div class="header">
+        <img src="../public/JSSMVP_logo.jpeg" alt="Left Logo">
+        <div class="header-title">JSS TAX REPORT</div>
+        <img src="../public/jss logo.jpg" alt="Right Logo" class="right-logo">
+    </div>
+
+    <form method="post" action="/new">
+        <table>
+            <tr>
+                <th>DIVISION ID</th>
+                <th>DIVISION</th>
+                <th>DISTRICT</th>
+                <th>TALUK</th>
+                <th>CITY/VILLAGE</th>
+                <th>PID NO</th>
+                <th>NAME OF THE INSTITUTION</th>
+                <th>NAME OF THE KHATHADAR</th>
+                <th>KHATHA OR PROPERTY NO</th>
+                <th>PID NO</th>
+                <th>DIMENSION OF VACANT AREA (SQFT)</th>
+                <th>DIMENSION OF BUILDING AREA (SQFT)</th>
+                <th>TOTAL DIMENSION (SQFT)</th>
+                <th>TO WHICH DEPARTMENT PAID</th>
+                <th>YEAR OF PAYMENT</th>
+                <th>RECEIPT NO</th>
+                <th>PROPERTY TAX</th>
+                <th>REBATE</th>
+                <th>SERVICE TAX</th>
+                <th>CESSES</th>
+                <th>INTEREST</th>
+                <th>PENALTY</th>
+                <th>TOTAL AMOUNT</th>
+                <th>REMARKS</th>
+            </tr>
             <% information.forEach((entry)=>{ %>
                 <tr>
                     <td><%=entry.division_id%></td>
@@ -43,7 +142,7 @@
                     <td><%=entry.village_or_city%></td>
                     <td><%=entry.pid_no%></td>
                     <td><%=entry.name_of_institution%></td>
-                    <td><%=entry.name_of_khathadhar%></td>
+                    <td><%=entry.name_of_khathadar%></td>
                     <td><%=entry.khatha_or_property_no%></td>
                     <td><%=entry.pid_no%></td>
                     <td><%=entry.dimension_of_vacant_area_in_sqft%></td>
@@ -62,13 +161,13 @@
                     <td><%=entry.remarks%></td>
                 </tr>
            <% }) %>
-    </table>
+        </table>
 
-    <form method="post" action="/new">
-        <button type="submit">Add New</button>
+        <div class="submit-button">
+            <button type="submit">Add New</button>
+        </div>
     </form>
-    
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>    
 </body>
 </html>
