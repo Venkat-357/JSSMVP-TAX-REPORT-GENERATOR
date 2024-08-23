@@ -103,8 +103,6 @@
         <img src="../public/JSSMVP_logo.jpeg" alt="Left Logo" style="width: 100px; height: 100px;">
         <div class="header-title">JSS TAX REPORT</div>
     </div>
-
-    <form method="post" action="/new">
         <table>
             <tr>
                 <th>DIVISION ID</th>
@@ -112,10 +110,9 @@
                 <th>DISTRICT</th>
                 <th>TALUK</th>
                 <th>CITY/VILLAGE</th>
-                <th>PID NO</th>
+                <th>KHATHA OR PROPERTY NO</th>
                 <th>NAME OF THE INSTITUTION</th>
                 <th>NAME OF THE KHATHADAR</th>
-                <th>KHATHA OR PROPERTY NO</th>
                 <th>PID NO</th>
                 <th>DIMENSION OF VACANT AREA (SQFT)</th>
                 <th>DIMENSION OF BUILDING AREA (SQFT)</th>
@@ -139,10 +136,9 @@
                     <td><%=entry.district%></td>
                     <td><%=entry.taluk%></td>
                     <td><%=entry.village_or_city%></td>
-                    <td><%=entry.pid_no%></td>
+                    <td><%=entry.khatha_or_property_no%></td>
                     <td><%=entry.name_of_institution%></td>
                     <td><%=entry.name_of_khathadar%></td>
-                    <td><%=entry.khatha_or_property_no%></td>
                     <td><%=entry.pid_no%></td>
                     <td><%=entry.dimension_of_vacant_area_in_sqft%></td>
                     <td><%=entry.dimension_of_building_area_in_sqft%></td>
@@ -158,14 +154,21 @@
                     <td><%=entry.penalty%></td>
                     <td><%=entry.total_amount%></td>
                     <td><%=entry.remarks%></td>
+                    <td>
+                            <a type="submit" href="/modify?division_id=<%=entry.division_id%>&khatha_num=<%=entry.khatha_or_property_no%>">Modify</button>
+                    </td>
+                </tr>
                 </tr>
            <% }) %>
         </table>
 
+        <form method="post" action="/new">
         <div class="submit-button">
             <button type="submit">Add New</button>
         </div>
-    </form>
+        </form>
+
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>    
 </body>
