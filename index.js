@@ -3,15 +3,52 @@ import bodyParser from 'body-parser';
 import pg from 'pg';
 
 const app = express();
-const port = 3000;
+const port = process.env.APP_PORT || 3000;
+
 const db = new pg.Client({
-    user : "postgres",
-    host : "localhost",
-    database : "JSSMVP",
-    password : "July30@venkat",
-    port : 5432,
+    host : process.env.POSTGRES_HOST,
+    database : process.env.POSTGRES_DATABASE,
+    user : process.env.POSTGRES_USER,
+    password : process.env.POSTGRES_PASSWORD,
+    port : process.env.POSTGRES_PORT,
 });
 db.connect();
+
+
+// Create tables if they don't exist
+db.query(`CREATE TABLE IF NOT EXISTS public.location (
+            division_id integer NOT NULL,
+            division character varying(50) COLLATE pg_catalog."default",
+            district character varying(50) COLLATE pg_catalog."default",
+            taluk character varying(50) COLLATE pg_catalog."default",
+            village_or_city character varying(50) COLLATE pg_catalog."default",
+            khatha_or_property_no numeric NOT NULL,
+            CONSTRAINT location_pk PRIMARY KEY (division_id),
+            CONSTRAINT location_khatha_or_property_no_key UNIQUE (khatha_or_property_no)
+        )
+`);
+db.query(`CREATE TABLE IF NOT EXISTS public.payment_of_property_tax_details(
+            name_of_institution character varying(50) COLLATE pg_catalog."default",
+            name_of_khathadar character varying(50) COLLATE pg_catalog."default",
+            khatha_or_property_no integer NOT NULL,
+            pid_no integer NOT NULL,
+            dimension_of_vacant_area_in_sqft numeric,
+            dimension_of_building_area_in_sqft numeric,
+            total_dimension_in_sqft numeric,
+            to_which_department_paid character varying(50) COLLATE pg_catalog."default",
+            year_of_payment integer,
+            receipt_no integer,
+            property_tax numeric,
+            rebate numeric,
+            service_tax numeric,
+            cesses numeric,
+            interest numeric,
+            penalty numeric,
+            total_amount numeric,
+            remarks character varying(100) COLLATE pg_catalog."default",
+            CONSTRAINT payment_of_property_tax_details_pkey PRIMARY KEY (khatha_or_property_no)
+        )
+`);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine","ejs");
@@ -26,7 +63,7 @@ app.get("/", async(req,res)=>{
         });
     return;
     } catch(err) {
-        res.send("the database is empty");
+        res.send("the database is empty or some error occured");
     }
     const result06 = await db.query("SELECT * FROM location JOIN payment_of_property_tax_details ON location.pid_no = payment_of_property_tax_details.pid_no ORDER BY location.pid_no ASC");
     const information = result06.rows;
@@ -41,30 +78,33 @@ app.post("/new", async(req,res)=>{
 });
 
 app.post("/submit", async(req,res)=>{
-    const division_id = req.body['division-id'];
-    const division = req.body.division;
-    const district = req.body.district;
-    const taluk = req.body.taluk;
-    const city = req.body.city;
-    const pid = req.body.pid;
-    const institution_name = req.body['institution-name'];
-    const khathadar_name = req.body['khathadar-name'];
-    const khatha_no = req.body['khatha-no'];
-    const pid_num = req.body['property-id'];
-    const vacant_dimension = req.body['vacant-area'];
-    const building_dimension = req.body['building-area'];
-    const total_dimension = req.body['total-dimension'];
-    const department = req.body.department;
-    const payment_year = req.body['payment-year'];
-    const receipt_no = req.body['receipt-no'];
-    const property_tax = req.body['property-tax'];
-    const rebate = req.body.rebate;
-    const service_tax = req.body['service-tax'];
-    const cesses = req.body.cesses;
-    const interest = req.body.interest;
-    const penalty = req.body.penalty;
-    const total_amount = req.body['total-amount'];
-    const remarks = req.body.remarks;
+    const {
+        divisionId,
+        division,
+        district,
+        taluk,
+        city,
+        pid,
+        institutionName,
+        khathadarName,
+        khathaNo,
+        pidNum,
+        vacantDimension,
+        buildingDimension,
+        totalDimension,
+        department,
+        paymentYear,
+        receiptNo,
+        propertyTax,
+        rebate,
+        serviceTax,
+        cesses,
+        interest,
+        penalty,
+        totalAmount,
+        remarks
+    } = req.body;
+    
     console.log(division_id);
 
     try {
