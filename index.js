@@ -1,9 +1,21 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import pg from 'pg';
+import session from 'express-session';
 
 const app = express();
 const port = process.env.APP_PORT || 3000;
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'))
+app.use(
+    session({
+        secret: 'secret',
+        resave: false,
+        saveUninitialized: false
+    })
+);
+app.set("view engine","ejs");
 
 const db = new pg.Client({
     host : process.env.POSTGRES_HOST,
@@ -13,9 +25,6 @@ const db = new pg.Client({
     port : process.env.POSTGRES_PORT,
 });
 db.connect();
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set("view engine","ejs");
 
 
 // Create tables if they don't exist
@@ -67,7 +76,7 @@ app.get("/", async(req,res)=>{
     }
 });
 
-app.post("/new", async(req,res)=>{
+app.get("/new", async(req,res)=>{
     res.render("new_row.ejs");
 });
 
