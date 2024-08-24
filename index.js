@@ -20,33 +20,35 @@ app.set("view engine","ejs");
 
 // Create tables if they don't exist
 db.query(`CREATE TABLE IF NOT EXISTS public.location (
-            division_id integer PRIMARY KEY,
+            division_id bigint PRIMARY KEY,
             division character varying(50) COLLATE pg_catalog."default",
             district character varying(50) COLLATE pg_catalog."default",
             taluk character varying(50) COLLATE pg_catalog."default",
             village_or_city character varying(50) COLLATE pg_catalog."default",
-            khatha_or_property_no numeric NOT NULL UNIQUE
+            khatha_or_property_no bigint NOT NULL UNIQUE
         )
 `);
 db.query(`CREATE TABLE IF NOT EXISTS public.payment_of_property_tax_details (
-            pid_no SERIAL PRIMARY KEY,
+            sno SERIAL PRIMARY KEY,
+            pid_no bigint DEFAULT -1,
             name_of_institution character varying(50) COLLATE pg_catalog."default",
             name_of_khathadar character varying(50) COLLATE pg_catalog."default",
-            khatha_or_property_no integer, 
-            dimension_of_vacant_area_in_sqft numeric,
-            dimension_of_building_area_in_sqft numeric,
-            total_dimension_in_sqft numeric,
+            khatha_or_property_no bigint, 
+            dimension_of_vacant_area_in_sqft real,
+            dimension_of_building_area_in_sqft real,
+            total_dimension_in_sqft real,
             to_which_department_paid character varying(50) COLLATE pg_catalog."default",
             year_of_payment integer,
-            receipt_no integer,
-            property_tax numeric,
-            rebate numeric,
-            service_tax numeric,
-            cesses numeric,
-            interest numeric,
-            penalty numeric,
-            total_amount numeric,
+            receipt_no bigint,
+            property_tax real,
+            rebate real,
+            service_tax real,
+            cesses real,
+            interest real,
+            penalty real,
+            total_amount real,
             remarks character varying(100) COLLATE pg_catalog."default",
+            CONSTRAINT year_of_payment CHECK (year_of_payment >= 1900),
             CONSTRAINT fk_khatha_or_property_no FOREIGN KEY (khatha_or_property_no) REFERENCES public.location (khatha_or_property_no) ON DELETE CASCADE ON UPDATE CASCADE
         )
 `);
@@ -73,6 +75,7 @@ app.post("/submit", async(req,res)=>{
     const division_id = req.body['division-id'];
     const division = req.body.division;
     const district = req.body.district;
+    const pid_no = req.body['property-id'];
     const taluk = req.body.taluk;
     const city = req.body.city;
     const institution_name = req.body['institution-name'];
@@ -95,8 +98,8 @@ app.post("/submit", async(req,res)=>{
 
     try {
         await db.query(`INSERT INTO location VALUES (${division_id},'${division}','${district}','${taluk}','${city}',${khatha_no})`);
-        await db.query(`INSERT INTO payment_of_property_tax_details (name_of_institution, name_of_khathadar, khatha_or_property_no, dimension_of_vacant_area_in_sqft, dimension_of_building_area_in_sqft, total_dimension_in_sqft, to_which_department_paid, year_of_payment, receipt_no, property_tax, rebate, service_tax, cesses, interest, penalty, total_amount, remarks) 
-                VALUES ('${institution_name}', '${khathadar_name}', ${khatha_no}, ${vacant_dimension}, ${building_dimension}, ${total_dimension}, '${department}', ${payment_year}, ${receipt_no}, ${property_tax}, ${rebate}, ${service_tax}, ${cesses}, ${interest}, ${penalty}, ${total_amount}, '${remarks}')`);
+        await db.query(`INSERT INTO payment_of_property_tax_details (pid_no,name_of_institution, name_of_khathadar, khatha_or_property_no, dimension_of_vacant_area_in_sqft, dimension_of_building_area_in_sqft, total_dimension_in_sqft, to_which_department_paid, year_of_payment, receipt_no, property_tax, rebate, service_tax, cesses, interest, penalty, total_amount, remarks) 
+                VALUES (${pid_no},'${institution_name}', '${khathadar_name}', ${khatha_no}, ${vacant_dimension}, ${building_dimension}, ${total_dimension}, '${department}', ${payment_year}, ${receipt_no}, ${property_tax}, ${rebate}, ${service_tax}, ${cesses}, ${interest}, ${penalty}, ${total_amount}, '${remarks}')`);
         console.log("The data was added successfully");
         res.redirect("/");
     } catch (err) {
