@@ -76,8 +76,12 @@ app.get("/", async(req,res)=>{
     }
 });
 
-app.get("/new", async(req,res)=>{
-    res.render("new_row.ejs");
+app.post("/new", async(req,res)=>{
+    try {
+        res.render("new_row.ejs");
+    } catch (err) {
+        res.send("error handling the request");
+    }
 });
 
 app.post("/submit", async(req,res)=>{
@@ -162,6 +166,7 @@ app.post("/edit",async(req,res)=>{
         await db.query(`UPDATE payment_of_property_tax_details 
                         SET name_of_institution='${institution_name}', 
                             name_of_khathadar='${khathadar_name}', 
+                            pid_no='${pid_num}',
                             dimension_of_vacant_area_in_sqft=${vacant_dimension}, 
                             dimension_of_building_area_in_sqft=${building_dimension}, 
                             total_dimension_in_sqft=${total_dimension}, 
@@ -187,10 +192,55 @@ app.post("/edit",async(req,res)=>{
         console.log("The data was modified successfully");
         res.redirect("/");
     } catch (err) {
-        console.log(err);
+        console.log("the data is not modified successfully");
     }
 });
 
+app.get("/delete",async(req,res)=>{
+    let division_id = req.query['division_id'];
+    let khatha_num = req.query['khatha_num'];
+    res.render("delete.ejs",{
+        division_id : division_id,
+        khatha_num : khatha_num,
+    });
+});
+
+app.post("/remove",async(req,res)=>{
+    let division_id = req.body['division_id'];
+    let khatha_num = req.body['khatha_no'];
+    console.log(division_id);
+    console.log(khatha_num);
+    try {
+        await db.query("DELETE FROM payment_of_property_tax_details WHERE khatha_or_property_no = $1",[khatha_num]);
+        await db.query("DELETE FROM location WHERE division_id = $1",[division_id]);
+    } catch (error) {
+        console.log('the data is not deleted');
+    }
+});
+
+app.post("/creport",async(req,res)=>{
+    let result03 = await db.query("SELECT * FROM location JOIN payment_of_property_tax_details ON location.khatha_or_property_no = payment_of_property_tax_details.khatha_or_property_no");
+    let data = result03.rows;
+    res.render("creport.ejs",{
+        data : data,
+    });
+});
+
+app.get("/back",async(req,res)=>{
+    res.redirect("/");
+});
+
+app.post("/lreport",async(req,res)=>{
+    let result04 = await db.query("SELECT pid_no,name_of_institution,name_of_khathadar,khatha_or_property_no FROM payment_of_property_tax_details");
+    let data = result04.rows;
+    res.render("lreport.ejs",{
+        data : data,
+    });
+});
+
+app.get("/back",async(req,res)=>{
+    res.redirect("/");
+});
 
 
 app.listen(port,()=>{
