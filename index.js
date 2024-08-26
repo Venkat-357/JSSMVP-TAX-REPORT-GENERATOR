@@ -2,15 +2,18 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import pg from 'pg';
 import session from 'express-session';
+import { validateEmail, validatePassword } from './utils/Validation.js';
+import createTablesIfNotExists from './utils/CreateTables.js';
 
 const app = express();
 const port = process.env.APP_PORT || 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
+// Creating the `public` folder as the static folder, allows our app to use the files in the `public` folder, like the JSS logo
 app.use(express.static('public'))
 app.use(
     session({
-        secret: 'secret',
+        secret: process.env.APP_SECRET,
         resave: false,
         saveUninitialized: false
     })
@@ -24,63 +27,222 @@ const db = new pg.Client({
     password : process.env.POSTGRES_PASSWORD,
     port : process.env.POSTGRES_PORT,
 });
-db.connect();
+
+try {
+    db.connect();
+    console.log("Connected to the database");
+} catch (err) {
+    console.log("Failed to connect to the database");
+    console.log(err);
+}
 
 
 // Create tables if they don't exist
-db.query(`CREATE TABLE IF NOT EXISTS public.location (
-            division_id bigint PRIMARY KEY,
-            division character varying(50) COLLATE pg_catalog."default",
-            district character varying(50) COLLATE pg_catalog."default",
-            taluk character varying(50) COLLATE pg_catalog."default",
-            village_or_city character varying(50) COLLATE pg_catalog."default",
-            khatha_or_property_no bigint NOT NULL UNIQUE
-        )
-`);
-db.query(`CREATE TABLE IF NOT EXISTS public.payment_of_property_tax_details (
-            sno SERIAL PRIMARY KEY,
-            pid_no bigint DEFAULT -1,
-            name_of_institution character varying(50) COLLATE pg_catalog."default",
-            name_of_khathadar character varying(50) COLLATE pg_catalog."default",
-            khatha_or_property_no bigint, 
-            dimension_of_vacant_area_in_sqft real,
-            dimension_of_building_area_in_sqft real,
-            total_dimension_in_sqft real,
-            to_which_department_paid character varying(50) COLLATE pg_catalog."default",
-            year_of_payment integer,
-            receipt_no bigint,
-            property_tax real,
-            rebate real,
-            service_tax real,
-            cesses real,
-            interest real,
-            penalty real,
-            total_amount real,
-            remarks character varying(100) COLLATE pg_catalog."default",
-            CONSTRAINT year_of_payment CHECK (year_of_payment >= 1900),
-            CONSTRAINT fk_khatha_or_property_no FOREIGN KEY (khatha_or_property_no) REFERENCES public.location (khatha_or_property_no) ON DELETE CASCADE ON UPDATE CASCADE
-        )
-`);
+createTablesIfNotExists(db);
 
+// Register - Only for division-users for now. Admins can be added manually
+app.get('/register', (req,res)=>{
+    res.render("register.ejs");
+});
 
-app.get("/", async(req,res)=>{
+// TODO: USE BCRYPT!!! PASSWORDS ARE STORED IN PLAIN TEXT!!
+app.post('/register', async(req,res)=>{
+    const email = req.body.email;
+    const password = req.body.password;
+    const phone = req.body.phone;
+    const division_id = req.body['division-id'];
+    const division = req.body.division;
+
+    // Check if the email is valid
+    if (!validateEmail(email)) {
+        res.send("Please enter a valid email");
+        return;
+    }
+
+    // Check if the email or division_id already exists
+    let query_result = await db.query(`SELECT * FROM division_users WHERE email = '${email}'`);
+    if (query_result.rows.length > 0) {
+        res.send("The email already exists");
+        return;
+    }
+
+    // Check if the division_id is a number
+    if (isNaN(division_id)) {
+        res.send("The division id should be a number");
+        return;
+    }
+
+    query_result = await db.query(`SELECT * FROM division_users WHERE division_id = ${division_id}`);
+    if (query_result.rows.length > 0) {
+        res.send("The division id already exists");
+        return;
+    }
+
+    // Check if division_name exists
+    query_result = await db.query(`SELECT * FROM division_users WHERE division = '${division}'`);
+    if (query_result.rows.length > 0) {
+        res.send("The division name already exists");
+        return;
+    }
+
+    // Check if the phone number is a number
+    if (isNaN(phone)) {
+        res.send("The phone number should be a number");
+        return;
+    }
+
+    // Check if the password is valid
+    if (!validatePassword(password)) {
+        res.send("The password should be at least 8 characters long and contain at least one letter and one number");
+        return;
+    }
+
     try {
-        const query_result = await db.query("SELECT * FROM location JOIN payment_of_property_tax_details ON location.khatha_or_property_no = payment_of_property_tax_details.khatha_or_property_no ORDER BY location.khatha_or_property_no ASC");
-        const information = query_result.rows;
-        res.render("main.ejs", {
-            information : information,
-        });
-    return;
-    } catch(err) {
-        res.send("the database is empty or some error occured");
+        await db.query(`INSERT INTO division_users VALUES (${division_id},'${division}','${email}','${password}',${phone})`);
+        console.log("The data was added successfully");
+        res.redirect("/login");
+    } catch (err) {
+        res.send(err);
     }
 });
 
-app.get("/new", async(req,res)=>{
-    res.render("new_row.ejs");
+// Login methods - The same form is used for both admins and division users
+// The login endpoint will automatically log in the user based on the type of user
+app.get("/login", (req,res)=>{
+    if (req.session.loggedin) {
+        res.redirect("/");
+    } else {
+        res.render("login.ejs");
+    }
 });
 
-app.post("/submit", async(req,res)=>{
+app.post("/login", async(req,res)=>{
+    const email = req.body.email;
+    const password = req.body.password;
+    // For admins
+    let query_result = await db.query(`SELECT * FROM admins WHERE email = '${email}'`);
+    if (query_result.rows.length > 0) {
+        const user = query_result.rows[0];
+        if (user.password === password) {
+            req.session.loggedin = true;
+            req.session.admin = true;
+            req.session.division_user = false;
+            req.session.user_details = {
+                email : user.email,
+                password : user.password,
+            };
+            res.redirect("/");
+            return;
+        } else {
+            res.send("Invalid credentials");
+            return;
+        }
+    }
+    // For division users
+    query_result = await db.query(`SELECT * FROM division_users WHERE email = '${email}'`);
+    if (query_result.rows.length > 0) {
+        const user = query_result.rows[0];
+        if (user.password === password) {
+            req.session.loggedin = true;
+            req.session.division_user = true;
+            req.session.admin = false;
+            req.session.user_details = {
+                division_id : user.division_id,
+                division : user.division,
+                email : user.email,
+                password : user.password,
+            };
+            res.redirect("/");
+        } else {
+            res.send("Invalid credentials");
+        }
+    } else {
+        res.send("Invalid credentials");
+    }
+});
+
+// Logout
+app.get("/logout", (req,res)=>{
+    if (!req.session.loggedin) {
+        res.redirect("/login");
+        return;
+    }
+    req.session.destroy((err) => {
+        if (err) {
+            return console.log(err);
+        }
+        res.redirect("/login")
+        return;
+    });
+});
+
+
+// Main page - Will display the data based on the type of user:
+// - Admins will see all the data
+// - Division users will see only the data from their division
+app.get("/", async(req,res)=>{
+    if (!req.session.loggedin) {
+        res.redirect("/login");
+    }
+    // For admins
+    if (req.session.admin) {
+        try {
+            const query_result = await db.query("SELECT * FROM location JOIN payment_of_property_tax_details ON location.khatha_or_property_no = payment_of_property_tax_details.khatha_or_property_no ORDER BY location.khatha_or_property_no ASC");
+            const information = query_result.rows;
+            res.render("main.ejs", {
+                information : information,
+            });
+        return;
+        } catch(err) {
+            res.send("the database is empty or some error occured");
+        }
+    }
+    // For division users
+    if (req.session.division_user) {
+        try {
+            const query_result = await db.query(`SELECT * FROM location JOIN payment_of_property_tax_details ON location.khatha_or_property_no = payment_of_property_tax_details.khatha_or_property_no WHERE division_id = ${req.session.user_details.division_id} ORDER BY location.khatha_or_property_no ASC`);
+            const information = query_result.rows;
+            res.render("main.ejs", {
+                information : information,
+            });
+            return;
+        } catch(err) {
+            res.send("the database is empty or some error occured");
+        }
+    }
+});
+
+// New entry - Only for division users
+app.get("/new", async(req,res)=>{
+    if (!req.session.loggedin) {
+        res.redirect("/login");
+        return;
+    }
+    // Admins can't make new entries
+    if (req.session.admin) {
+        res.send("You are not authorized to make new entries, please login as a division user");
+        return;
+    }
+    try {
+        res.render("new_row.ejs",{
+            division_id : req.session.user_details.division_id,
+            division : req.session.user_details.division,
+        });
+    } catch (err) {
+        console.log(err);
+        res.send(err);
+    }
+});
+
+
+app.post("/new", async(req,res)=>{
+    if (!req.session.loggedin) {
+        res.redirect("/login");
+    }
+    if (req.session.admin) {
+        res.send("You are not authorized to modify the data, please login as a division user");
+        return
+    }
     const division_id = req.body['division-id'];
     const division = req.body.division;
     const district = req.body.district;
@@ -117,7 +279,17 @@ app.post("/submit", async(req,res)=>{
 });
 
 
+// Modify - Only for division users
+// DivisionID and Khatha number are preinputted in the form from the user's details
 app.get("/modify",async(req,res)=>{
+    if (!req.session.loggedin) {
+        res.redirect("/login");
+        return;
+    }
+    if (req.session.admin) {
+        res.send("You are not authorized to modify the data, please login as a division user");
+        return
+    }
     let division_identification = req.query['division_id'];
     let khatha_identification = req.query['khatha_num'];
     const query_result = await db.query("SELECT * FROM location JOIN payment_of_property_tax_details ON location.khatha_or_property_no = payment_of_property_tax_details.khatha_or_property_no WHERE division_id = $1 AND location.khatha_or_property_no = $2 ",[division_identification,khatha_identification]);
@@ -132,7 +304,14 @@ app.get("/modify",async(req,res)=>{
     }
 });
 
-app.post("/edit",async(req,res)=>{
+app.post("/modify",async(req,res)=>{
+    if (!req.session.loggedin) {
+        res.redirect("/login");
+    }
+    if (req.session.admin) {
+        res.send("You are not authorized to modify the data, please login as a division user");
+        return;
+    }
     const division_id = req.body['division-id'];
     const division = req.body.division;
     const district = req.body.district;

@@ -1,0 +1,28 @@
+<%- include('partials/header'); -%>
+<form action="/register" method="POST" class="form-container">
+    <h3>Register Division User</h3>
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" required>
+    </div>
+    <div class="form-group">
+        <label for="division">Division Name:</label>
+        <input type="text" id="division" name="division" required>
+    </div>
+    <div class="form-group">
+        <label for="division">Division ID:</label>
+        <input type="number" id="division-id" name="division-id" min="0" step="1" required>
+    </div>
+    <div class="submit-button">
+        <button type="submit">Register</button>
+    </div>
+</form>
+<%- include('partials/footer'); -%>
