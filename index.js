@@ -191,6 +191,7 @@ app.get("/", async(req,res)=>{
             const information = query_result.rows;
             res.render("main.ejs", {
                 information : information,
+                isAdmin : true,
             });
         return;
         } catch(err) {
@@ -204,6 +205,7 @@ app.get("/", async(req,res)=>{
             const information = query_result.rows;
             res.render("main.ejs", {
                 information : information,
+                isAdmin : false,
             });
             return;
         } catch(err) {
@@ -341,6 +343,7 @@ app.post("/modify",async(req,res)=>{
         await db.query(`UPDATE payment_of_property_tax_details 
                         SET name_of_institution='${institution_name}', 
                             name_of_khathadar='${khathadar_name}', 
+                            pid_no='${pid_num}',
                             dimension_of_vacant_area_in_sqft=${vacant_dimension}, 
                             dimension_of_building_area_in_sqft=${building_dimension}, 
                             total_dimension_in_sqft=${total_dimension}, 
@@ -366,10 +369,56 @@ app.post("/modify",async(req,res)=>{
         console.log("The data was modified successfully");
         res.redirect("/");
     } catch (err) {
-        console.log(err);
+        console.log("the data is not modified successfully");
     }
 });
 
+app.get("/delete",async(req,res)=>{
+    let division_id = req.query['division_id'];
+    let khatha_num = req.query['khatha_num'];
+    if (!division_id || !khatha_num) {
+        res.send("The page you are looking for is not available");
+        return;
+    } else {
+        res.render("delete.ejs",{
+            division_id : division_id,
+            khatha_num : khatha_num,
+        });
+    }
+});
+
+app.post("/delete", async(req,res)=>{
+    let division_id = req.body['division_id'];
+    let khatha_num = req.body['khatha_no'];
+    try {
+        await db.query("DELETE FROM payment_of_property_tax_details WHERE khatha_or_property_no = $1",[khatha_num]);
+        await db.query("DELETE FROM location WHERE division_id = $1",[division_id]);
+        res.redirect("/");
+        return;
+    } catch (error) {
+        console.log('the data is not deleted');
+        res.send("The data was not deleted");
+        return;
+    }
+});
+
+// Please check whether the admins and divison users are supposed to see the reports or not
+// app.get("/comprehensive-report",async(req,res)=>{
+//     let query_result = await db.query("SELECT * FROM location JOIN payment_of_property_tax_details ON location.khatha_or_property_no = payment_of_property_tax_details.khatha_or_property_no");
+//     let data = query_result.rows;
+//     res.render("creport.ejs",{
+//         data : data,
+//     });
+// });
+
+// Please check whether the admins and divison users are supposed to see the report or not
+// app.get("/local-report",async(req,res)=>{
+//     let query_result = await db.query("SELECT pid_no,name_of_institution,name_of_khathadar,khatha_or_property_no FROM payment_of_property_tax_details");
+//     let data = query_result.rows;
+//     res.render("lreport.ejs",{
+//         data : data,
+//     });
+// });
 
 
 app.listen(port,()=>{

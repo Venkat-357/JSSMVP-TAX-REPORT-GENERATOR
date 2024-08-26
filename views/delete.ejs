@@ -1,0 +1,13 @@
+<%- include('partials/header'); -%>
+<h3>Are you sure you want to delete the row with: </h3>
+<h3>division id = <%=division_id%></h3>
+<h3>khatha number = <%=khatha_num%>?</h3>
+<form method="post" action="/delete">
+    <input type="hidden" name="division_id" value="<%=division_id%>">
+    <input type="hidden" name="khatha_no" value="<%=khatha_num%>">
+    <button type="submit" class="btn-dangerous">Confirm</button>
+</form>
+<div class="btn-secondary">
+    <button><a href="/">Cancel</a></button>
+</div>
+<%- include('partials/footer'); -%>

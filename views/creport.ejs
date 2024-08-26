@@ -25,7 +25,7 @@
                 <th>TOTAL AMOUNT</th>
                 <th>REMARKS</th>
             </tr>
-            <% information.forEach((entry)=>{ %>
+            <% data.forEach((entry)=>{ %>
                 <tr>
                     <td><%=entry.division_id%></td>
                     <td><%=entry.division%></td>
@@ -50,28 +50,11 @@
                     <td><%=entry.penalty%></td>
                     <td><%=entry.total_amount%></td>
                     <td><%=entry.remarks%></td>
-                    <td>
-                            <button style="border: none;" type="submit"><a href="/modify?division_id=<%=entry.division_id%>&khatha_num=<%=entry.khatha_or_property_no%>">Modify</button>
-                    </td>
-                    <td>
-                            <button style="border: none;" type="submit"><a href="/delete?division_id=<%=entry.division_id%>&khatha_num=<%=entry.khatha_or_property_no%>">Delete</button>
-                    </td>
                 </tr>
                 </tr>
            <% }) %>
         </table>
-        <% if (!isAdmin) { %>
-            <div class="submit-button">
-                <button type="submit"><a href="/new">Add New</a></button>
-            </div>
-        <% } %>
-        
-
-        <!-- <div class="submit-button">
-            <button type="submit"><a href="/comprehensive-report">Comprehensive Report</a></button>
-        </div>
-
         <div class="submit-button">
-            <button type="submit"><a href="/local-report">Local Report</a></button>
-        </div> -->
+            <button type="submit"><a href="/">Go Back</a></button>
+        </div>
 <%- include('partials/footer'); -%>

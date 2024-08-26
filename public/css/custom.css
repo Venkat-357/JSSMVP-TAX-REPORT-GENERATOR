@@ -119,3 +119,8 @@ td {
 .gray-out:hover {
     cursor: not-allowed;
 }
+
+button > a {
+    text-decoration: none;
+    color: #ffffff;
+}
