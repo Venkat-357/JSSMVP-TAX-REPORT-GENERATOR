@@ -2,7 +2,7 @@
 
 INSERT INTO division_users (division_id, division, email, password, phone)
 VALUES (1, 'Div1', 'johndoe2@example.com', 'JohnDoe2@', '1234567890'),
-    (2, 'Div1', 'johndoe@example.com', 'JohnDoe123!', '9999999999');
+    (2, 'Div2', 'johndoe@example.com', 'JohnDoe123!', '9999999999');
 
 INSERT INTO admins (email, password)
 VALUES ('admin@admin', 'yolo');

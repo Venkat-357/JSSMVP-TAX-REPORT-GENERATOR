@@ -62,6 +62,14 @@ const createTablesIfNotExists = (db) => {
             CONSTRAINT fk_khatha_or_property_no FOREIGN KEY (khatha_or_property_no) REFERENCES public.location (khatha_or_property_no) ON DELETE CASCADE ON UPDATE CASCADE
         )
     `);
+    db.query(`CREATE TABLE IF NOT EXISTS images (
+        sno int PRIMARY KEY,
+        filename VARCHAR(255),
+        filetype VARCHAR(50),
+        data BYTEA,
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_sno FOREIGN KEY (sno) REFERENCES public.payment_of_property_tax_details (sno) ON DELETE CASCADE ON UPDATE CASCADE
+    )`)
     console.log('Tables Created Successfully!');
 }
 

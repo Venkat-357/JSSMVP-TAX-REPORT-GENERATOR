@@ -11,4 +11,15 @@
     <div class="header">
         <img src="JSSMVP_logo.jpeg" alt="Left Logo" style="width: 100px; height: 100px;">
         <div class="header-title">JSS TAX REPORT</div>
+        
+        <% if (isLoggedIn) { %>
+            <% if (isAdmin) { %>
+                <p>Logged in as ADMIN</p>
+            <% } else { %>
+                <p>Logged in as Division <%= division_id %></p>
+            <% } %>
+            <a href="/logout">Logout</a>
+        <% } else { %>
+            <a href="/login">Login</a>
+        <% } %>
     </div>

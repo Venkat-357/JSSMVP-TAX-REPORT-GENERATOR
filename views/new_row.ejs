@@ -1,6 +1,6 @@
 <%- include('partials/header'); -%>
 <div class="form-container">
-    <form action="/new" method="post">
+    <form action="/new" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label for="division-id">DIVISION ID :</label>
             <input id="division-id" type="number" name="division-id" required
@@ -147,6 +147,10 @@
             <input id="remarks" type="text" name="remarks">
         </div>
 
+        <div class="form-group">
+            <label for="image">Bill Image (Max size: 5MB):</label>
+            <input id="image" type="file" name="image" accept="image/jpeg, image/png, image/gif">
+        </div>
         <div class="submit-button">
             <button type="submit">Submit</button>
         </div>

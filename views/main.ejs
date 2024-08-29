@@ -24,6 +24,7 @@
                 <th>PENALTY</th>
                 <th>TOTAL AMOUNT</th>
                 <th>REMARKS</th>
+                <th colspan="3" style="text-align: center;">OPTIONS</th>
             </tr>
             <% information.forEach((entry)=>{ %>
                 <tr>
@@ -51,6 +52,9 @@
                     <td><%=entry.total_amount%></td>
                     <td><%=entry.remarks%></td>
                     <td>
+                            <button style="border: none;" type="submit"><a href="/image?sno=<%=entry.sno%>">View Bill</button>
+                    </td>
+                    <td>
                             <button style="border: none;" type="submit"><a href="/modify?division_id=<%=entry.division_id%>&khatha_num=<%=entry.khatha_or_property_no%>">Modify</button>
                     </td>
                     <td>
@@ -67,11 +71,11 @@
         <% } %>
         
 
-        <!-- <div class="submit-button">
+        <div class="submit-button">
             <button type="submit"><a href="/comprehensive-report">Comprehensive Report</a></button>
         </div>
 
         <div class="submit-button">
             <button type="submit"><a href="/local-report">Local Report</a></button>
-        </div> -->
+        </div>
 <%- include('partials/footer'); -%>
